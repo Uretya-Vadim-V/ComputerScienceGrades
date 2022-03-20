@@ -2,13 +2,12 @@
 using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Drawing;
+using System.Collections.Generic;
 
 namespace ComputerScienceGrades
 {
     class Program
-    {
-        // секундомер
-        static Stopwatch stopwatch = new();
+    {       
         // переменная для хранения времени работы алгоритма
         static double timeWork;
         static Random random = new();
@@ -24,6 +23,9 @@ namespace ComputerScienceGrades
         }
         private static void Stopwatch(int[] array)
         {
+            // секундомер
+            Stopwatch stopwatch = new();
+            timeWork = 0;
             stopwatch.Reset();
             stopwatch.Start();
             FindingNumberFiveInArray(array);
@@ -39,7 +41,6 @@ namespace ComputerScienceGrades
             {
                 array[i] = random.Next(1, 5);//заполняем массив случайными числами
             }
-
             return array;
         }
         // Средний случай заполнения массива
@@ -64,59 +65,76 @@ namespace ComputerScienceGrades
             {
                 array[i] = 5;
             }
-
             return array;
         }
         static void Main(string[] args)
         {
             try
             {
+                List<int> n = new List<int> { 1000000, 2000000, 3000000, 4000000, 5000000 };
+                // количество оиспытаний
+                int quantity = 10;
                 // создание excel  файла
                 Excel.Application excel = new();
-                excel.Visible = true;
                 Excel.Workbook workBook = excel.Workbooks.Add(Type.Missing);
                 Excel.Worksheet sheet = (Excel.Worksheet)excel.Worksheets.get_Item(1);
-                sheet.get_Range("A1", "B1").Columns.EntireColumn.ColumnWidth = 30;
                 sheet.Name = "График";
-                // создаём массив длинной 20
-                int[] pointsArray = new int[20];
-                Best(pointsArray); // Холостой прогон
-                Console.WriteLine("▬▬▬▬▬▬▬▬▬▬     Количество элементов массива 20    ▬▬▬▬▬▬▬▬▬▬\n" +
-                    "----------     Количество испытаний 10 000 000    ----------");
-                // обнуляем время перед началом серии экспериментов
-                timeWork = 0;
-                for (int j = 0; j < 10000000; j++)
+                int x = 2, y = 2;
+                foreach (int k in n)
                 {
-                    Stopwatch(Best(pointsArray));
+                    sheet.Cells[x, 1] = String.Format($"{k}");
+                    int[] pointsArray = new int[k];
+                    Best(pointsArray); // Холостой прогон
+                    Console.WriteLine($"▬▬▬▬▬▬▬▬▬▬     Количество элементов массива {k}    ▬▬▬▬▬▬▬▬▬▬");
+                    for (int j = 0; j < quantity; j++)
+                    {
+                        Stopwatch(Best(pointsArray));
+                    }
+                    // выводим время работы алгоритма в милллисекундах
+                    Console.WriteLine($"Лучший случай:  {timeWork / 5:0.0}");
+                    sheet.Cells[x, y].Formula = $"={timeWork}/{quantity}";
+                    y++;
+                    for (int j = 0; j < quantity; j++)
+                    {
+                        Stopwatch(Average(pointsArray));
+                    }
+                    Console.WriteLine($"Средний случай: {timeWork / 5:0.0}");
+                    sheet.Cells[x, y].Formula = $"={timeWork}/{quantity}";
+                    y++;
+                    for (int j = 0; j < quantity; j++)
+                    {
+                        Stopwatch(Worst(pointsArray));
+                    }
+                    Console.WriteLine($"Худший случай:  {timeWork / 5:0.0}");
+                    sheet.Cells[x, y].Formula = $"={timeWork}/{quantity}";
+                    x++; y = 2;
                 }
-                // выводим время работы алгоритма в милллисекундах
-                Console.WriteLine($"Лучший случай:  {timeWork / 10000:0.0}");
-                sheet.Cells[1, 1] = String.Format("Лучший случай:");
-                sheet.Cells[1, 2] = String.Format($"{timeWork / 10000:0.0}");
-                sheet.get_Range("A1", "B1").Font.Color = ColorTranslator.ToOle(Color.Green);
-                sheet.get_Range("A1", "B1").Font.Size = 20;
-                timeWork = 0;
-                for (int j = 0; j < 10000000; j++)
-                {
-                    Stopwatch(Average(pointsArray));
-                }
-                Console.WriteLine($"Средний случай: {timeWork / 10000:0.0}");
-                sheet.Cells[2, 1] = String.Format("Средний случай:");
-                sheet.Cells[2, 2] = String.Format($"{timeWork / 10000:0.0}");
-                sheet.get_Range("A2", "B2").Font.Color = ColorTranslator.ToOle(Color.Blue);
-                sheet.get_Range("A2", "B2").Font.Size = 20;
-                timeWork = 0;
-                for (int j = 0; j < 10000000; j++)
-                {
-                    Stopwatch(Worst(pointsArray));
-                }
-                Console.WriteLine($"Худший случай:  {timeWork / 10000:0.0}");
-                sheet.Cells[3, 1] = String.Format("Худший случай:");
-                sheet.Cells[3, 2] = String.Format($"{timeWork / 10000:0.0}");
-                sheet.get_Range("A3", "B3").Font.Color = ColorTranslator.ToOle(Color.Orange);
-                sheet.get_Range("A3", "B3").Font.Size = 20;
+                Excel.Range range = sheet.get_Range("A1", "D6");
+                sheet.Cells[1, 2] = String.Format("Лучший случай");
+                sheet.Cells[1, 3] = String.Format("Средний случай");
+                sheet.Cells[1, 4] = String.Format("Худший случай");
+                sheet.get_Range("A1", "D1").Columns.EntireColumn.ColumnWidth = 23;
+                range.Cells.Font.Size = 16;
+                range.Cells.Font.Name = "Times New Roman";
+                range.HorizontalAlignment = Excel.Constants.xlCenter;
+                range.VerticalAlignment = Excel.Constants.xlCenter;
+                sheet.get_Range("B2", "D6").Cells.Interior.Color = ColorTranslator.ToOle(Color.FromArgb(200, 170, 190));
+                sheet.get_Range("B1", "D1").Cells.Interior.Color = ColorTranslator.ToOle(Color.FromArgb(140, 200, 130));
+                sheet.get_Range("A2", "A6").Cells.Interior.Color = ColorTranslator.ToOle(Color.FromArgb(230, 170, 170));
+                range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeBottom).LineStyle = Excel.XlLineStyle.xlContinuous;
+                range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeRight).LineStyle = Excel.XlLineStyle.xlContinuous;
+                range.Borders.get_Item(Excel.XlBordersIndex.xlInsideHorizontal).LineStyle = Excel.XlLineStyle.xlContinuous;
+                range.Borders.get_Item(Excel.XlBordersIndex.xlInsideVertical).LineStyle = Excel.XlLineStyle.xlContinuous;
+                range.Borders.get_Item(Excel.XlBordersIndex.xlEdgeTop).LineStyle = Excel.XlLineStyle.xlContinuous;
+                Excel.ChartObjects chartsobjrcts = (Excel.ChartObjects)sheet.ChartObjects(Type.Missing);
+                Excel.ChartObject chartsobjrct = chartsobjrcts.Add(520, 10, 300, 200);
+                chartsobjrct.Chart.ChartWizard(sheet.get_Range("A1", "D6"), Excel.XlChartType.xlLine, 2, Excel.XlRowCol.xlColumns, 
+                    Type.Missing, -1, true, "Алгоритм", "Длина массива", "Среднее время");
+                excel.Application.DisplayAlerts = false;
                 // сохранение таблицы в папку "Документы" на диск "C"
                 excel.Application.ActiveWorkbook.SaveAs("Graphic.xlsx");
+                workBook.Save();
+                excel.Visible = true;
                 Console.ReadLine();
             }
             catch (Exception ex)
