@@ -130,8 +130,8 @@ namespace ComputerScienceGrades
                 Excel.ChartObject chartsobjrct = chartsobjrcts.Add(520, 10, 300, 200);
                 chartsobjrct.Chart.ChartWizard(sheet.get_Range("A1", "D6"), Excel.XlChartType.xlLine, 2, Excel.XlRowCol.xlColumns, 
                     Type.Missing, -1, true, "Алгоритм", "Длина массива", "Среднее время");
-                excel.Application.DisplayAlerts = false;
                 // сохранение таблицы в папку "Документы" на диск "C"
+                excel.Application.DisplayAlerts = false;
                 excel.Application.ActiveWorkbook.SaveAs("Graphic.xlsx");
                 workBook.Save();
                 excel.Visible = true;
