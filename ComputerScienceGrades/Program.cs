@@ -91,21 +91,21 @@ namespace ComputerScienceGrades
                         Stopwatch(Best(pointsArray));
                     }
                     // выводим время работы алгоритма в милллисекундах
-                    Console.WriteLine($"Лучший случай:  {timeWork / 5:0.0}");
+                    Console.WriteLine($"Лучший случай:  {timeWork / quantity:0.0}");
                     sheet.Cells[x, y].Formula = $"={timeWork}/{quantity}";
                     y++;
                     for (int j = 0; j < quantity; j++)
                     {
                         Stopwatch(Average(pointsArray));
                     }
-                    Console.WriteLine($"Средний случай: {timeWork / 5:0.0}");
+                    Console.WriteLine($"Средний случай: {timeWork / quantity:0.0}");
                     sheet.Cells[x, y].Formula = $"={timeWork}/{quantity}";
                     y++;
                     for (int j = 0; j < quantity; j++)
                     {
                         Stopwatch(Worst(pointsArray));
                     }
-                    Console.WriteLine($"Худший случай:  {timeWork / 5:0.0}");
+                    Console.WriteLine($"Худший случай:  {timeWork / quantity:0.0}");
                     sheet.Cells[x, y].Formula = $"={timeWork}/{quantity}";
                     x++; y = 2;
                 }
